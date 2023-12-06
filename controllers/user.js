@@ -41,11 +41,11 @@ export const getHistoryLogin = async (req, res, next) => {
   }
 };
 
-
 export const logout = async (req, res, next) => {
   try {
     console.log(66666, req.userInfo);
     const input = req.body;
+    console.log(input, 66666);
 
     if (
       !input.every((device) => device.clientID && device.clientID.trim() !== "")
