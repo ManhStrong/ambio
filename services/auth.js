@@ -12,8 +12,11 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const redis = require("redis");
-const redisUrl = "redis://127.0.0.1:6379";
-const client = redis.createClient(redisUrl);
+//const redisUrl = "redis://127.0.0.1:6379";
+const client = redis.createClient({
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+});
 
 export const registerService = async ({ phoneNumber }) => {
   try {
