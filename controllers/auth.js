@@ -25,6 +25,7 @@ export const register = async (req, res, next) => {
     }
 
     const response = await registerService(req.body);
+
     return res.status(200).json(response);
   } catch (error) {
     if (error instanceof Error && error.message === "phoneNumber is exist") {
@@ -34,18 +35,32 @@ export const register = async (req, res, next) => {
         res
       );
     }
-    return InteralServerErrorException();
+    return InteralServerErrorException(
+      "Internal server",
+      ErrorCode.DUPLICATE_VALUE,
+      res
+    );
   }
 };
 
 export const vetifyCode = async (req, res, next) => {
   try {
     const phoneNumberRegex = /^(0[1-9]|84[1-9])([0-9]{8})$/;
-    const { phoneNumber, code } = req.body;
-    if (!phoneNumberRegex.test(phoneNumber)) {
-      BadRequestException("Invalid phoneNumber", ErrorCode.INVALID_PARAM, res);
+    const { phoneNumber, code, token } = req.body;
+    if (!phoneNumber || !code || !token) {
+      return BadRequestException(
+        "phoneNumber or code or token are not empty",
+        ErrorCode.REQUIRED_PARAM,
+        res
+      );
     }
-
+    if (!phoneNumberRegex.test(phoneNumber)) {
+      return BadRequestException(
+        "Invalid phoneNumber",
+        ErrorCode.INVALID_PARAM,
+        res
+      );
+    }
     const response = await vetifyCodeService(req.body);
     return res.status(200).json(response);
   } catch (error) {
@@ -55,6 +70,28 @@ export const vetifyCode = async (req, res, next) => {
     ) {
       return BadRequestException(
         "Invalid phoneNumber or code",
+        ErrorCode.INVALID_PARAM,
+        res
+      );
+    }
+
+    if (
+      error instanceof Error &&
+      error.message === "PhoneNumber is not register"
+    ) {
+      return BadRequestException(
+        "PhoneNumber is not register",
+        ErrorCode.NEED_REGISTER_PHONENUMBER,
+        res
+      );
+    }
+
+    if (
+      error instanceof Error &&
+      error.message === "PhoneNumber is not register"
+    ) {
+      return BadRequestException(
+        "PhoneNumber is not register",
         ErrorCode.INVALID_PARAM,
         res
       );
@@ -69,10 +106,10 @@ export const vetifyCode = async (req, res, next) => {
 
 export const signUp = async (req, res, next) => {
   try {
-    const { phoneNumber, passWord } = req.body;
-    if (!phoneNumber || !passWord) {
+    const { phoneNumber, passWord, token, deviceTokenCFM } = req.body;
+    if ((!phoneNumber || !passWord || !token, !deviceTokenCFM)) {
       return BadRequestException(
-        "phoneNumber and password are not empty",
+        "phoneNumber and password token are not empty",
         ErrorCode.REQUIRED_PARAM,
         res
       );
@@ -80,6 +117,16 @@ export const signUp = async (req, res, next) => {
     const response = await signUpService(req.body);
     return res.status(200).json(response);
   } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === "PhoneNumber is not register"
+    ) {
+      return BadRequestException(
+        "PhoneNumber is not register",
+        ErrorCode.NEED_REGISTER_PHONENUMBER,
+        res
+      );
+    }
     if (error instanceof Error && error.message === "phoneNumber is exist") {
       return BadRequestException(
         "phoneNumber is exist",
@@ -162,10 +209,10 @@ export const forgotPassword = async (req, res, next) => {
 
 export const confirmNewPassword = async (req, res, next) => {
   try {
-    const { newPassWord, phoneNumber } = req.body;
-    if (!newPassWord || !phoneNumber) {
+    const { newPassWord, phoneNumber, token } = req.body;
+    if ((!newPassWord || !phoneNumber, !token)) {
       return BadRequestException(
-        "password or phoneNumber is not empty",
+        "password or phoneNumber or token is not empty",
         ErrorCode.INVALID_PARAM,
         res
       );
@@ -173,6 +220,16 @@ export const confirmNewPassword = async (req, res, next) => {
     const response = await confirmNewPasswordService(req.body);
     return res.status(200).json(response);
   } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === "PhoneNumber is not verify"
+    ) {
+      return BadRequestException(
+        "PhoneNumber is not verify",
+        ErrorCode.NEED_REGISTER_PHONENUMBER,
+        res
+      );
+    }
     if (error instanceof Error && error.message === "User not found") {
       return BadRequestException("User not found", ErrorCode.NOT_FOUND, res);
     }

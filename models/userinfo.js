@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   UserInfo.init(
     {
       token: DataTypes.STRING,
+      isOriginDevice: DataTypes.BOOLEAN,
       clientID: DataTypes.STRING,
       deviceName: DataTypes.STRING,
       operatingSystem: DataTypes.STRING,

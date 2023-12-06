@@ -3,6 +3,8 @@ import generateRandomNumber from "../common/util/random";
 import generateRandomString from "../common/util/randomString";
 import bcrypt from "bcryptjs";
 import moment from "moment";
+import sendNotification from "./../common/util/notification";
+
 const util = require("util");
 
 const dotenv = require("dotenv");
@@ -23,8 +25,10 @@ export const registerService = async ({ phoneNumber }) => {
       throw new Error("phoneNumber is exist");
     }
     const code = generateRandomNumber();
+    const token = generateRandomString(20);
     await client.set(phoneNumber, code);
-    return { phoneNumber, code };
+    await client.set(`${phoneNumber}_token`, token);
+    return { phoneNumber, code, token };
   } catch (error) {
     throw error;
   } finally {
@@ -32,13 +36,15 @@ export const registerService = async ({ phoneNumber }) => {
   }
 };
 
-export const vetifyCodeService = async ({ phoneNumber, code }) => {
+export const vetifyCodeService = async ({ phoneNumber, code, token }) => {
   try {
     await client.connect();
     const storedRandomNumber = await client.get(phoneNumber);
-    if (code === Number(storedRandomNumber)) {
-    } else {
-      // Giá trị không khớp
+    const tokenStoreRedis = await client.get(`${phoneNumber}_token`);
+    if (tokenStoreRedis !== token) {
+      throw new Error("PhoneNumber is not register");
+    }
+    if (code !== Number(storedRandomNumber)) {
       throw new Error("Invalid phoneNumber or code");
     }
   } catch (error) {
@@ -61,22 +67,53 @@ const hashPassword = (passWord) =>
  * @param {*} param0
  * @returns
  */
-export const signUpService = async ({ phoneNumber, passWord }) => {
+export const signUpService = async ({
+  phoneNumber,
+  passWord,
+  clientID,
+  deviceName,
+  token,
+  operatingSystem,
+  deviceTokenCFM,
+}) => {
   try {
+    await client.connect();
+
+    const tokenStoreRedis = await client.get(`${phoneNumber}_token`);
+    if (tokenStoreRedis !== token) {
+      throw new Error("PhoneNumber is not register");
+    }
     const response = await db.User.findOrCreate({
       where: { phoneNumber },
       defaults: {
         phoneNumber,
+        deviceTokenCFM,
         passWord: hashPassword(passWord),
       },
     });
+    const createUser = response[0];
     if (response[1] === true) {
+      const userId = createUser.dataValues.id;
+      const randomString = generateRandomString(20);
+      const token = randomString.concat(userId);
+      await db.UserInfo.create({
+        userId: userId,
+        token,
+        clientID,
+        deviceName,
+        isOriginDevice: true,
+        operatingSystem,
+        expirationTime: moment().add(7, "days"),
+      });
       return {
-        message: "signUp succesfully",
+        accessToken: token,
       };
     } else throw new Error("phoneNumber is exist");
   } catch (error) {
+    console.log(error, 9999999);
     throw error;
+  } finally {
+    await client.disconnect();
   }
 };
 
@@ -109,7 +146,6 @@ export const loginService = async ({
     if (userInfo) {
       await db.UserInfo.update(
         {
-          token,
           expirationTime: moment().add(7, "days"),
         },
         {
@@ -119,6 +155,12 @@ export const loginService = async ({
           },
         }
       );
+      if (userInfo.isOriginDevice === false) {
+        sendNotification(user.deviceTokenCFM);
+      }
+      return {
+        accessToken: userInfo.token,
+      };
     } else {
       await db.UserInfo.create({
         userId: user.id,
@@ -126,12 +168,14 @@ export const loginService = async ({
         clientID,
         deviceName,
         operatingSystem,
+        isOriginDevice: false,
         expirationTime: moment().add(7, "days"),
       });
+      sendNotification(user.deviceTokenCFM);
+      return {
+        accessToken: token,
+      };
     }
-    return {
-      accessToken: token,
-    };
   } catch (error) {
     throw error;
   }
@@ -148,8 +192,11 @@ export const forgotPasswordService = async ({ phoneNumber }) => {
     }
 
     const code = generateRandomNumber();
+    const token = generateRandomString(20);
+
     await client.set(phoneNumber, code);
-    return { phoneNumber, code };
+    await client.set(`${phoneNumber}_token`, token);
+    return { phoneNumber, code, token };
   } catch (error) {
     throw error;
   } finally {
@@ -160,26 +207,68 @@ export const forgotPasswordService = async ({ phoneNumber }) => {
 export const confirmNewPasswordService = async ({
   newPassWord,
   phoneNumber,
+  clientID,
+  token,
+  deviceName,
+  operatingSystem,
 }) => {
   try {
-    const user = await db.User.findOne({
-      where: { phoneNumber },
-    });
-    if (!user) {
-      throw new Error("User not found");
+    await client.connect();
+    const tokenStoreRedis = await client.get(`${phoneNumber}_token`);
+    if (tokenStoreRedis !== token) {
+      throw new Error("PhoneNumber is not verify");
     }
-    await db.User.update(
-      {
-        passWord: hashPassword(newPassWord),
-      },
-      {
+    const result = await db.sequelize.transaction(async (t) => {
+      const user = await db.User.findOne({
         where: { phoneNumber },
+        transaction: t,
+      });
+
+      if (!user) {
+        throw new Error("User not found");
       }
-    );
-    return {
-      message: "change password successfully",
-    };
+
+      const randomString = generateRandomString(20);
+      const token = randomString.concat(user.id);
+
+      await db.User.update(
+        {
+          passWord: hashPassword(newPassWord),
+        },
+        {
+          where: { phoneNumber },
+          transaction: t,
+        }
+      );
+
+      await db.UserInfo.destroy({
+        where: { userId: user.id },
+        transaction: t,
+      });
+
+      await db.UserInfo.create(
+        {
+          userId: user.id,
+          token,
+          clientID,
+          deviceName,
+          operatingSystem,
+          expirationTime: moment().add(7, "days"),
+        },
+        {
+          transaction: t,
+        }
+      );
+
+      return {
+        accessToken: token,
+      };
+    });
+    return result;
   } catch (error) {
+    console.log(error, "huhuh");
     throw error;
+  } finally {
+    await client.disconnect();
   }
 };
