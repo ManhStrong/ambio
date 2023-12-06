@@ -160,6 +160,7 @@ export const logIn = async (req, res, next) => {
     const response = await loginService(req.body);
     return res.status(200).json(response);
   } catch (error) {
+    console.log(error, 8888);
     if (
       error instanceof Error &&
       error.message === "invalid phoneNumber or password"
