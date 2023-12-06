@@ -16,8 +16,8 @@ const redisUrl = "redis://127.0.0.1:6379";
 const client = redis.createClient(redisUrl);
 
 export const registerService = async ({ phoneNumber }) => {
-  await client.connect();
   try {
+    await client.connect();
     const response = await db.User.findOne({
       where: { phoneNumber },
     });
