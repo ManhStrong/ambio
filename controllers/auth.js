@@ -30,6 +30,7 @@ export const register = async (req, res, next) => {
 
     return res.status(200).json(response);
   } catch (error) {
+    console.log(error, 99999);
     if (error instanceof Error && error.message === "phoneNumber is exist") {
       return BadRequestException(
         "phoneNumber is exist",
@@ -39,7 +40,7 @@ export const register = async (req, res, next) => {
     }
     return InteralServerErrorException(
       "Internal server",
-      ErrorCode.DUPLICATE_VALUE,
+      ErrorCode.UNEXPECTED,
       res
     );
   }
