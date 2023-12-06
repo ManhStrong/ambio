@@ -14,6 +14,7 @@ import ErrorCode from "../common/util/errorCode";
 
 export const register = async (req, res, next) => {
   try {
+    console.log("test2");
     const phoneNumberRegex = /^(0[1-9]|84[1-9])([0-9]{8})$/;
     const { phoneNumber } = req.body;
     if (!phoneNumberRegex.test(phoneNumber)) {
