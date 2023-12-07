@@ -18,11 +18,14 @@ module.exports = (sequelize, DataTypes) => {
       phoneNumber: DataTypes.STRING,
       passWord: DataTypes.STRING,
       email: DataTypes.STRING,
-      deviceTokenCFM: DataTypes.STRING
+      deviceTokenCFM: DataTypes.STRING,
     },
     {
       sequelize,
       modelName: "User",
+    },
+    {
+      freezeTableName: true,
     }
   );
   return User;
