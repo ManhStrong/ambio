@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const { Sequelize } = require("sequelize");
+console.log(process.env.MYSQL_DB, 99999);
 const sequelize = new Sequelize(
   process.env.MYSQL_DB,
   process.env.DB_USER,
