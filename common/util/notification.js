@@ -1,8 +1,9 @@
 import https from "https";
+import { google } from "googleapis";
 
 async function sendNotification(deviceTokenCFM) {
   const notification = {
-    title: "Ambio notification433",
+    title: "Ambio notification414",
     text: "Text",
   };
 
@@ -19,6 +20,20 @@ async function sendNotification(deviceTokenCFM) {
   try {
     console.log(1234567889);
 
+    // Cấu hình thư viện để sử dụng proxy HTTP/HTTPS
+    google.options({
+      http: {
+        agent: new https.Agent({
+          proxy: process.env.HTTP_PROXY,
+        }),
+      },
+      https: {
+        agent: new https.Agent({
+          proxy: process.env.HTTPS_PROXY,
+        }),
+      },
+    });
+
     // Tạo promise để xử lý yêu cầu HTTPS
     const response = await new Promise((resolve, reject) => {
       const req = https.request(
@@ -27,8 +42,7 @@ async function sendNotification(deviceTokenCFM) {
           method: "POST",
           headers: {
             Authorization:
-              "key=" +
-              "AAAA5kqLEa8:APA91bF5ycQHHy1U7yP_tskNjvWMg-zGqR-6R86S_8Y95uN8tEL99IZIa8jaLAbUdkNGUQLBeaFoh4BdETH9HU0pkJeg3QiewiDRK6P7lrbARAZ0HdxYRlgC38k5DSfe4J3d2y5vMT3Q",
+              "key=" + "AAAA5kqLEa8:APA91bF5ycQHHy1U7yP_tskNjvWMg-zGqR-sdfds",
             "Content-Type": "application/json",
           },
         },
