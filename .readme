@@ -1,8 +1,35 @@
-APP_PORT=3000
-DB_PORT=3306
-DB_HOST=localhost
-DB_USER=root
-DB_PASS=
-MYSQL_DB=hahaha
-REDIS_HOST = '127.0.0.1'
-REDIS_PORT = 6379
+APP_PORT = 3000;
+DB_PORT = 3306;
+DB_HOST = localhost;
+DB_USER = root;
+DB_PASS = MYSQL_DB = hahaha;
+REDIS_HOST = "127.0.0.1";
+REDIS_PORT = 6379;
+
+APP_PORT = 3000;
+DB_HOST = bfg6m6ith0hgspaw10nb - mysql.services.clever - cloud.com;
+DB_USER = u5jxlfijcyqfl9cj;
+DB_PASS = tPApkCtS3FaioriZ9jhB;
+MYSQL_DB = bfg6m6ith0hgspaw10nb;
+REDIS_HOST = "127.0.0.1";
+REDIS_PORT = 6379;
+
+// console.log(deviceTokenCFM, 2222);
+// const serverKey =
+//   "AAAA5kqLEa8:APA91bF5ycQHHy1U7yP_tskNjvWMg-zGqR-6R86S_8Y95uN8tEL99IZIa8jaLAbUdkNGUQLBeaFoh4BdETH9HU0pkJeg3QiewiDRK6P7lrbARAZ0HdxYRlgC38k5DSfe4J3d2y5vMT3Q";
+// const fcm = new FCM(serverKey);
+// const message = {
+//   to: deviceTokenCFM,
+//   notification: {
+//     title: "Ambio Notification",
+//     body: "Cósssss thiết bị đang đăng nhập tài khoản của bạn",
+//   },
+// };
+// fcm.send(message, function (err, response) {
+//   if (err) {
+//     console.log(err, 7777);
+//     console.log("Something has gone wrong!");
+//   } else {
+//     console.log("Successfully sent with response: ", response);
+//   }
+// });

@@ -148,11 +148,25 @@ export const signUp = async (req, res, next) => {
 
 export const logIn = async (req, res, next) => {
   try {
+    const phoneNumberRegex = /^(0[1-9]|84[1-9])([0-9]{8})$/;
     const { phoneNumber, passWord, clientID, deviceName, operatingSystem } =
       req.body;
-    if (!phoneNumber || !passWord || !clientID) {
+    if (!phoneNumberRegex.test(phoneNumber)) {
       return BadRequestException(
-        "phoneNumber and password clientID are not empty",
+        "Invalid phoneNumber",
+        ErrorCode.INVALID_PARAM,
+        res
+      );
+    }
+    if (
+      !phoneNumber ||
+      !passWord ||
+      !clientID ||
+      !deviceName ||
+      !operatingSystem
+    ) {
+      return BadRequestException(
+        "phoneNumber and password clientID, deviceName, operatingSystem are not empty",
         ErrorCode.REQUIRED_PARAM,
         res
       );
@@ -163,6 +177,17 @@ export const logIn = async (req, res, next) => {
     console.log(error, 8888);
     if (
       error instanceof Error &&
+      error.message === "phoneNumber does not exist"
+    ) {
+      console.log(123456);
+      return BadRequestException(
+        "phoneNumber does not exist",
+        ErrorCode.NOT_FOUND,
+        res
+      );
+    }
+    if (
+      error instanceof Error &&
       error.message === "invalid phoneNumber or password"
     ) {
       return BadRequestException(
@@ -171,6 +196,7 @@ export const logIn = async (req, res, next) => {
         res
       );
     }
+
     return InteralServerErrorException(
       "Internal error server",
       ErrorCode.UNEXPECTED,
@@ -181,7 +207,16 @@ export const logIn = async (req, res, next) => {
 
 export const forgotPassword = async (req, res, next) => {
   try {
+    const phoneNumberRegex = /^(0[1-9]|84[1-9])([0-9]{8})$/;
+
     const { phoneNumber } = req.body;
+    if (!phoneNumberRegex.test(phoneNumber)) {
+      return BadRequestException(
+        "Invalid phoneNumber",
+        ErrorCode.INVALID_PARAM,
+        res
+      );
+    }
     if (!phoneNumber) {
       return BadRequestException(
         "phoneNumber is not empty",

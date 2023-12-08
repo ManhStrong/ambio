@@ -5,17 +5,13 @@ import bcrypt from "bcryptjs";
 import moment from "moment";
 import sendNotification from "./../common/util/notification";
 
-const util = require("util");
-
 const dotenv = require("dotenv");
 
 dotenv.config();
 
 const redis = require("redis");
-//const redisUrl = "redis://127.0.0.1:6379";
 const client = redis.createClient({
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
+  url: process.env.REDIS_URI,
 });
 
 export const registerService = async ({ phoneNumber }) => {
@@ -131,8 +127,11 @@ export const loginService = async ({
     const user = await db.User.findOne({
       where: { phoneNumber },
     });
+    if (!user) {
+      throw new Error("phoneNumber does not exist");
+    }
 
-    if (!user || !bcrypt.compareSync(passWord, user.passWord)) {
+    if (!bcrypt.compareSync(passWord, user.passWord)) {
       throw new Error("invalid phoneNumber or password");
     }
 
