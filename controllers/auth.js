@@ -5,6 +5,7 @@ import {
   loginService,
   forgotPasswordService,
   confirmNewPasswordService,
+  verifyPhoneNymber,
 } from "../services/auth";
 import {
   BadRequestException,
@@ -143,6 +144,41 @@ export const signUp = async (req, res, next) => {
       ErrorCode.UNEXPECTED,
       res
     );
+  }
+};
+
+export const verifyPhoneNumber = async (req, res, next) => {
+  try {
+    const phoneNumberRegex = /^(0[1-9]|84[1-9])([0-9]{8})$/;
+    const { phoneNumber } = req.body;
+    if (!phoneNumberRegex.test(phoneNumber)) {
+      return BadRequestException(
+        "Invalid phoneNumber",
+        ErrorCode.INVALID_PARAM,
+        res
+      );
+    }
+    if (!phoneNumber) {
+      return BadRequestException(
+        "phoneNumber are not empty",
+        ErrorCode.REQUIRED_PARAM,
+        res
+      );
+    }
+
+    const response = await verifyPhoneNymber(req.body);
+    return res.status(200).json(response);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === "PhoneNumber does not exist"
+    ) {
+      return BadRequestException(
+        "PhoneNumber does not exist",
+        ErrorCode.NOT_FOUND,
+        res
+      );
+    }
   }
 };
 

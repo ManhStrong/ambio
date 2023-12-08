@@ -255,6 +255,7 @@ export const confirmNewPasswordService = async ({
           clientID,
           deviceName,
           operatingSystem,
+          isOriginDevice: true,
           expirationTime: moment().add(7, "days"),
         },
         {
@@ -272,5 +273,14 @@ export const confirmNewPasswordService = async ({
     throw error;
   } finally {
     await client.disconnect();
+  }
+};
+
+export const verifyPhoneNymber = async ({ phoneNumber }) => {
+  const response = await db.User.findOne({
+    where: { phoneNumber },
+  });
+  if (!response) {
+    throw new Error("PhoneNumber does not exist");
   }
 };
