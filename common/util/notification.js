@@ -25,6 +25,7 @@ async function sendNotification(deviceTokenCFM) {
       },
       body: JSON.stringify(notificationBody),
     });
+    console.log(response, 88888);
 
     if (response.ok) {
       console.log("Thành công");
