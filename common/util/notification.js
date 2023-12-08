@@ -1,10 +1,10 @@
-import axios from "axios";
+import FCM from "fcm-node";
+import fetch from "node-fetch";
 
 async function sendNotification(deviceTokenCFM) {
-  console.log(deviceTokenCFM, "hahahahh");
   const notification = {
     title: "Ambio notification",
-    body: "Có thiết bị đang đănh nhập tài khoản của bạn",
+    text: "Text",
   };
 
   const fcmToken = [deviceTokenCFM];
@@ -14,21 +14,22 @@ async function sendNotification(deviceTokenCFM) {
   };
 
   try {
-    await axios
-      .post("https://fcm.googleapis.com/fcm/send", notificationBody, {
-        headers: {
-          Authorization:
-            "key=" +
-            "AAAA5kqLEa8:APA91bF5ycQHHy1U7yP_tskNjvWMg-zGqR-6R86S_8Y95uN8tEL99IZIa8jaLAbUdkNGUQLBeaFoh4BdETH9HU0pkJeg3QiewiDRK6P7lrbARAZ0HdxYRlgC38k5DSfe4J3d2y5vMT3Q",
-          "Content-Type": "application/json",
-        },
-      })
-      .then((response) => {
-        console.log("Thanh cong");
-      })
-      .catch((err) => {
-        console.log("that bai");
-      });
+    const response = await fetch("https://fcm.googleapis.com/fcm/send", {
+      method: "POST",
+      headers: {
+        Authorization:
+          "key=" +
+          "AAAA5kqLEa8:APA91bF5ycQHHy1U7yP_tskNjvWMg-zGqR-6R86S_8Y95uN8tEL99IZIa8jaLAbUdkNGUQLBeaFoh4BdETH9HU0pkJeg3QiewiDRK6P7lrbARAZ0HdxYRlgC38k5DSfe4J3d2y5vMT3Q",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(notificationBody),
+    });
+
+    if (response.ok) {
+      console.log("Thành công");
+    } else {
+      console.log("Lỗi trong quá trình gửi thông báo");
+    }
   } catch (err) {
     console.error(err);
   }
