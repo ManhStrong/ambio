@@ -13,8 +13,10 @@ async function sendNotification(deviceTokenCFM) {
     notification: notification,
     registration_ids: fcmToken,
   };
+  console.log(notificationBody, 78787);
 
   try {
+    console.log(1234567889);
     const response = await fetch("https://fcm.googleapis.com/fcm/send", {
       method: "POST",
       headers: {
