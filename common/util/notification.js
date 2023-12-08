@@ -3,9 +3,10 @@ import fetch from "node-fetch";
 
 async function sendNotification(deviceTokenCFM) {
   const notification = {
-    title: "Ambio notification",
+    title: "Ambio notification414",
     text: "Text",
   };
+  console.log(deviceTokenCFM, 6666);
 
   const fcmToken = [deviceTokenCFM];
   const notificationBody = {
@@ -31,7 +32,7 @@ async function sendNotification(deviceTokenCFM) {
       console.log("Lỗi trong quá trình gửi thông báo");
     }
   } catch (err) {
-    console.error(err);
+    console.error(err, 161616);
   }
 }
 
