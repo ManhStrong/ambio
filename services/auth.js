@@ -3,7 +3,6 @@ import generateRandomNumber from "../common/util/random";
 import generateRandomString from "../common/util/randomString";
 import bcrypt from "bcryptjs";
 import moment from "moment";
-import sendNotification from "./../common/util/notification";
 
 const dotenv = require("dotenv");
 
@@ -160,7 +159,7 @@ export const loginService = async ({
       if (userInfo.isOriginDevice === false) {
         const notification = {
           title: "Ambio notification414",
-          text: "Text",
+          body: "Có thiết bị mới đang đăng nhập tài khoản của bạn",
         };
 
         const fcmToken = [user.deviceTokenCFM];
@@ -209,7 +208,7 @@ export const loginService = async ({
       // sendNotification(user.deviceTokenCFM);
       const notification = {
         title: "Ambio notification414",
-        text: "Text",
+        body: "Có thiết bị mới đang đăng nhập tài khoản của bạn",
       };
 
       const fcmToken = [user.deviceTokenCFM];
