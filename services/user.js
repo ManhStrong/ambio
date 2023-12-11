@@ -104,7 +104,7 @@ export const getHistoryLoginService = async (userInfo) => {
         clientID: device.clientID,
         deviceName: device.deviceName,
         operatingSystem: device.operatingSystem,
-        accessLastTime: device.updatedAt,
+        accessLastTime: moment(device.updatedAt).format("DD/MM/YYYY"),
         isThisDevice,
       };
     });
