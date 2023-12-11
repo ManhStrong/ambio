@@ -177,7 +177,7 @@ export const loginService = async ({
             headers: {
               Authorization:
                 "key=" +
-                "AAAA5kqLEa8:APA91bF5ycQHHy1U7yP_tskNjvWMg-zGqR-6R86S_8Y95uN8tEL99IZIa8jaLAbUdkNGUQLBeaFoh4BdETH9HU0pkJeg3QiewiDRK6P7lrbARAZ0HdxYRlgC38k5DSfe4J3d2y5vMT3Q",
+                "AAAARTqzJsk:APA91bFOQm_5u_QE-p3loHH4jlT3QOcVANXRgiqDZNwBZSXu0dFbOLIVcBnCJ1fWn7R-OL4YndJ89v50_osRNT3gb7rAryIE5Oni8HikFtqpaKFyI9YqetlYDYQKbehIo5dAB7JwBNSG",
               "Content-Type": "application/json",
             },
             body: JSON.stringify(notificationBody),
@@ -226,7 +226,7 @@ export const loginService = async ({
           headers: {
             Authorization:
               "key=" +
-              "AAAA5kqLEa8:APA91bF5ycQHHy1U7yP_tskNjvWMg-zGqR-6R86S_8Y95uN8tEL99IZIa8jaLAbUdkNGUQLBeaFoh4BdETH9HU0pkJeg3QiewiDRK6P7lrbARAZ0HdxYRlgC38k5DSfe4J3d2y5vMT3Q",
+              "AAAARTqzJsk:APA91bFOQm_5u_QE-p3loHH4jlT3QOcVANXRgiqDZNwBZSXu0dFbOLIVcBnCJ1fWn7R-OL4YndJ89v50_osRNT3gb7rAryIE5Oni8HikFtqpaKFyI9YqetlYDYQKbehIo5dAB7JwBNSG",
             "Content-Type": "application/json",
           },
           body: JSON.stringify(notificationBody),
