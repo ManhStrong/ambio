@@ -13,7 +13,6 @@ import ErrorCode from "../common/util/errorCode";
 export const getUserCurrent = async (req, res, next) => {
   try {
     const response = await getUserById(req.userInfo);
-    console.log(6666, response);
     return res.status(200).json(response);
   } catch (error) {
     if (error instanceof Error && error.message === "Not found User") {
@@ -29,7 +28,6 @@ export const getUserCurrent = async (req, res, next) => {
 
 export const getHistoryLogin = async (req, res, next) => {
   try {
-    console.log(88888, req.userInfo);
     const response = await getHistoryLoginService(req.userInfo);
     return res.status(200).json(response);
   } catch (error) {
@@ -43,9 +41,7 @@ export const getHistoryLogin = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
-    console.log(66666, req.userInfo);
     const input = req.body;
-    console.log(input, 66666);
 
     if (
       !input.every((device) => device.clientID && device.clientID.trim() !== "")

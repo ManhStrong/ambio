@@ -108,12 +108,12 @@ export const signUpService = async ({
       };
     } else throw new Error("phoneNumber is exist");
   } catch (error) {
-    console.log(error, 9999999);
     throw error;
   } finally {
     await client.disconnect();
   }
 };
+
 
 export const loginService = async ({
   phoneNumber,
@@ -156,42 +156,6 @@ export const loginService = async ({
           },
         }
       );
-      if (userInfo.isOriginDevice === false) {
-        const notification = {
-          title: "Ambio notification414",
-          body: "Có thiết bị mới đang đăng nhập tài khoản của bạn",
-        };
-
-        const fcmToken = [user.deviceTokenCFM];
-        const notificationBody = {
-          notification: notification,
-          registration_ids: fcmToken,
-        };
-        console.log(notificationBody, 78787);
-
-        try {
-          console.log(1234567889);
-          const response = await fetch("https://fcm.googleapis.com/fcm/send", {
-            method: "POST",
-            headers: {
-              Authorization:
-                "key=" +
-                "AAAARTqzJsk:APA91bFOQm_5u_QE-p3loHH4jlT3QOcVANXRgiqDZNwBZSXu0dFbOLIVcBnCJ1fWn7R-OL4YndJ89v50_osRNT3gb7rAryIE5Oni8HikFtqpaKFyI9YqetlYDYQKbehIo5dAB7JwBNSG",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(notificationBody),
-          });
-          console.log(response, 88888);
-
-          if (response.ok) {
-            console.log("Thành công");
-          } else {
-            console.log("Lỗi trong quá trình gửi thông báo");
-          }
-        } catch (err) {
-          console.error(err, 161616);
-        }
-      }
       return {
         accessToken: userInfo.token,
       };
@@ -205,7 +169,6 @@ export const loginService = async ({
         isOriginDevice: false,
         expirationTime: moment().add(7, "days"),
       });
-      // sendNotification(user.deviceTokenCFM);
       const notification = {
         title: "Ambio notification414",
         body: "Có thiết bị mới đang đăng nhập tài khoản của bạn",
@@ -216,10 +179,8 @@ export const loginService = async ({
         notification: notification,
         registration_ids: fcmToken,
       };
-      console.log(notificationBody, 78787);
 
       try {
-        console.log(1234567889);
         const response = await fetch("https://fcm.googleapis.com/fcm/send", {
           method: "POST",
           headers: {
@@ -230,7 +191,6 @@ export const loginService = async ({
           },
           body: JSON.stringify(notificationBody),
         });
-        console.log(response, 88888);
 
         if (response.ok) {
           console.log("Thành công");
@@ -238,7 +198,6 @@ export const loginService = async ({
           console.log("Lỗi trong quá trình gửi thông báo");
         }
       } catch (err) {
-        console.error(err, 161616);
       }
       return {
         accessToken: token,
@@ -335,7 +294,6 @@ export const confirmNewPasswordService = async ({
     });
     return result;
   } catch (error) {
-    console.log(error, "huhuh");
     throw error;
   } finally {
     await client.disconnect();

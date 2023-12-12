@@ -62,7 +62,6 @@ export const getHistoryLoginService = async (userInfo) => {
     });
 
     const currentTime = new Date();
-    console.log(12333);
 
     // Bổ sung trường accessLastTime vào mỗi thiết bị
     const devicesWithAccessLastTime = listDevices.map((device) => {

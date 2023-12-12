@@ -1,5 +1,4 @@
 import { getFarmByUserID } from "./../services/farm";
-import AppError from "../common/util/appError";
 
 export const getFarmsByUser = async (req, res, next) => {
   try {
