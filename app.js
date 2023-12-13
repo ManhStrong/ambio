@@ -6,7 +6,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const { Sequelize } = require("sequelize");
-console.log(process.env.MYSQL_DB, 99999);
 const sequelize = new Sequelize(
   process.env.MYSQL_DB,
   process.env.DB_USER,
@@ -16,6 +15,13 @@ const sequelize = new Sequelize(
     dialect: "mysql",
     dialectModule: mysql2,
     operatorsAliases: false,
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000,
+      reconnect: true,
+    },
   }
 );
 

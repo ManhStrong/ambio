@@ -12,12 +12,10 @@ import {
   InteralServerErrorException,
 } from "../middlewares/handle-errors";
 import ErrorCode from "../common/util/errorCode";
+import { phoneNumberRegex } from "../common/util/regex";
 
 export const register = async (req, res, next) => {
   try {
-    console.log("test2");
-    console.log("testdatabase");
-    const phoneNumberRegex = /^(0[1-9]|84[1-9])([0-9]{8})$/;
     const { phoneNumber } = req.body;
     if (!phoneNumberRegex.test(phoneNumber)) {
       return BadRequestException(
@@ -49,7 +47,6 @@ export const register = async (req, res, next) => {
 
 export const vetifyCode = async (req, res, next) => {
   try {
-    const phoneNumberRegex = /^(0[1-9]|84[1-9])([0-9]{8})$/;
     const { phoneNumber, code, token } = req.body;
     if (!phoneNumber || !code || !token) {
       return BadRequestException(
@@ -149,7 +146,6 @@ export const signUp = async (req, res, next) => {
 
 export const verifyPhoneNumber = async (req, res, next) => {
   try {
-    const phoneNumberRegex = /^(0[1-9]|84[1-9])([0-9]{8})$/;
     const { phoneNumber } = req.body;
     if (!phoneNumberRegex.test(phoneNumber)) {
       return BadRequestException(
@@ -184,7 +180,6 @@ export const verifyPhoneNumber = async (req, res, next) => {
 
 export const logIn = async (req, res, next) => {
   try {
-    const phoneNumberRegex = /^(0[1-9]|84[1-9])([0-9]{8})$/;
     const { phoneNumber, passWord, clientID, deviceName, operatingSystem } =
       req.body;
     if (!phoneNumberRegex.test(phoneNumber)) {
@@ -243,8 +238,6 @@ export const logIn = async (req, res, next) => {
 
 export const forgotPassword = async (req, res, next) => {
   try {
-    const phoneNumberRegex = /^(0[1-9]|84[1-9])([0-9]{8})$/;
-
     const { phoneNumber } = req.body;
     if (!phoneNumberRegex.test(phoneNumber)) {
       return BadRequestException(
