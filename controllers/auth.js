@@ -324,7 +324,9 @@ export const confirmNewPassword = async (req, res, next) => {
 
 export const getUserInfo = async (req, res, next) => {
   try {
+    console.log(req.body, 6464664);
     const response = await getUserInfoService(req.body);
+
     return res.status(200).json(response);
   } catch (error) {
     if (error instanceof Error && error.message === "Invalid token") {

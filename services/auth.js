@@ -311,6 +311,8 @@ export const verifyPhoneNymber = async ({ phoneNumber }) => {
 export const getUserInfoService = async ({ token }) => {
   try {
     const userInfo = await findByConditions("UserInfo", { token });
+    console.log(token, 898989);
+    console.log(userInfo, 72727);
     if (!userInfo) {
       throw new Error("Invalid token");
     }
