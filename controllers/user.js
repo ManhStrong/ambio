@@ -10,22 +10,6 @@ import {
 } from "../middlewares/handle-errors";
 import ErrorCode from "../common/util/errorCode";
 
-export const getUserCurrent = async (req, res, next) => {
-  try {
-    const response = await getUserById(req.userInfo);
-    return res.status(200).json(response);
-  } catch (error) {
-    if (error instanceof Error && error.message === "Not found User") {
-      return BadRequestException("Not found User", ErrorCode.NOT_FOUND, res);
-    }
-    return InteralServerErrorException(
-      "Internal error server",
-      ErrorCode.UNEXPECTED,
-      res
-    );
-  }
-};
-
 export const getHistoryLogin = async (req, res, next) => {
   try {
     const response = await getHistoryLoginService(req.userInfo);

@@ -1,21 +1,12 @@
 import db from "../models";
 import moment from "moment";
 import { Op } from "sequelize";
+import {
+  updateRecord,
+  findAll,
+  findByConditions,
+} from "../lib/mysql/baseModel";
 
-export const getUserById = async (userInfo) => {
-  try {
-    const user = await db.User.findOne({
-      where: { id: userInfo.userId },
-      attributes: ["id", "userName", "phoneNumber", "email"],
-    });
-    if (!user) {
-      throw new Error("Not found User");
-    }
-    return { user };
-  } catch (error) {
-    throw error;
-  }
-};
 export const getHistoryLoginService = async (userInfo) => {
   try {
     const expirationTime = moment(userInfo.expirationTime);
@@ -28,39 +19,30 @@ export const getHistoryLoginService = async (userInfo) => {
       const newExpirationTime = moment(expirationTime).add(7, "days");
 
       // Cập nhật expirationTime trong cơ sở dữ liệu
-      await db.UserInfo.update(
+      await updateRecord(
+        "UserInfo",
+        { expirationTime: newExpirationTime },
         {
-          expirationTime: newExpirationTime,
-        },
-        {
-          where: {
-            userId: userInfo.userId,
-            clientID: userInfo.clientID,
-          },
+          userId: userInfo.userId,
+          clientID: userInfo.clientID,
         }
       );
     }
-    const listDevices = await db.UserInfo.findAll({
-      where: {
-        userId: userInfo.userId,
-      },
-      attributes: [
-        "id",
-        "updatedAt",
-        "clientID",
-        "deviceName",
-        "operatingSystem",
-        "token",
-      ],
-    });
 
-    const infoUserLogin = await db.User.findOne({
-      where: {
-        id: userInfo.userId,
-      },
-      attributes: ["userName", "phoneNumber"],
-    });
+    const listDevices = await findAll("UserInfo", { userId: userInfo.userId }, [
+      "id",
+      "updatedAt",
+      "clientID",
+      "deviceName",
+      "operatingSystem",
+      "token",
+    ]);
 
+    const infoUserLogin = await findByConditions(
+      "User",
+      { id: userInfo.userId },
+      ["userName", "phoneNumber"]
+    );
     const currentTime = new Date();
 
     // Bổ sung trường accessLastTime vào mỗi thiết bị
