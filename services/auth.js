@@ -309,15 +309,20 @@ export const verifyPhoneNymber = async ({ phoneNumber }) => {
 };
 
 export const getUserInfoService = async ({ token }) => {
-  const userInfo = await findByConditions("UserInfo", { token });
-  if (!userInfo) {
-    throw new Error("Invalid token");
+  try {
+    const userInfo = await findByConditions("UserInfo", { token });
+    if (!userInfo) {
+      throw new Error("Invalid token");
+    }
+    const user = await findByConditions("User", { id: userInfo.userId });
+    const expirationTime = userInfo.expirationTime;
+    const currentTime = new Date();
+    if (currentTime > expirationTime) {
+      throw new Error("Token has expired");
+    }
+    return { userName: user.userName, phoneNumber: user.phoneNumber };
+  } catch (error) {
+    console.log(error, 646464);
+    throw error;
   }
-  const user = await findByConditions("User", { id: userInfo.userId });
-  const expirationTime = userInfo.expirationTime;
-  const currentTime = new Date();
-  if (currentTime > expirationTime) {
-    throw new Error("Token has expired");
-  }
-  return { userName: user.userName, phoneNumber: user.phoneNumber };
 };
