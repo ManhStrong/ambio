@@ -38,11 +38,6 @@ export const getHistoryLoginService = async (userInfo) => {
       "token",
     ]);
 
-    const infoUserLogin = await findByConditions(
-      "User",
-      { id: userInfo.userId },
-      ["userName", "phoneNumber"]
-    );
     const currentTime = new Date();
 
     // Bổ sung trường accessLastTime vào mỗi thiết bị
@@ -91,7 +86,6 @@ export const getHistoryLoginService = async (userInfo) => {
     });
 
     return {
-      infoUserLogin: infoUserLogin,
       historyLogins: devicesWithAccessLastTime,
     };
   } catch (error) {

@@ -18,7 +18,9 @@ export const registerService = async ({ phoneNumber }) => {
   try {
     const response = await findByConditions("User", { phoneNumber });
     if (response) {
-      throw new Error("phoneNumber is exist");
+      throw new Error(
+        "Số điện thoại đã được đăng kí. Vui lòng đăng kí với số điện thoại khác"
+      );
     }
     const code = generateRandomNumber();
     const token = generateRandomString(20);
@@ -43,7 +45,7 @@ export const vetifyCodeService = async ({ phoneNumber, code, token }) => {
       throw new Error("PhoneNumber is not register");
     }
     if (code !== Number(storeRandomNumber)) {
-      throw new Error("Invalid phoneNumber or code");
+      throw new Error("code không hợp lệ hoặc đã hết hạn");
     }
   } catch (error) {
     throw error;
@@ -75,7 +77,7 @@ export const signUpService = async ({
   try {
     const tokenStoreRedis = await getRedis(`${phoneNumber}_token`);
     if (tokenStoreRedis !== token) {
-      throw new Error("PhoneNumber is not register");
+      throw new Error("not implement register phoneNumber");
     }
 
     const { result: user, created } = await findOrCreate(
@@ -106,7 +108,10 @@ export const signUpService = async ({
       return {
         accessToken: token,
       };
-    } else throw new Error("phoneNumber is exist");
+    } else
+      throw new Error(
+        "Số điện thoại đã được đăng kí. Vui lòng đăng kí với số điện thoại khác"
+      );
   } catch (error) {
     throw error;
   }
@@ -159,7 +164,7 @@ export const loginService = async ({
         expirationTime: moment().add(7, "days"),
       });
       const notification = {
-        title: "Ambio notification414",
+        title: "Ambio notification",
         body: "Có thiết bị mới đang đăng nhập tài khoản của bạn",
       };
 
@@ -200,7 +205,7 @@ export const forgotPasswordService = async ({ phoneNumber }) => {
   try {
     const response = await findByConditions("User", { phoneNumber });
     if (!response) {
-      throw new Error("PhoneNumber does not exist");
+      throw new Error(`Không tồn tại số điện thoại ${phoneNumber}`);
     }
 
     const code = generateRandomNumber();
@@ -214,6 +219,7 @@ export const forgotPasswordService = async ({ phoneNumber }) => {
     );
     return { phoneNumber, code, token };
   } catch (error) {
+    console.log(error, 89898);
     throw error;
   }
 };
@@ -296,6 +302,22 @@ export const confirmNewPasswordService = async ({
 export const verifyPhoneNymber = async ({ phoneNumber }) => {
   const response = await findByConditions("User", { phoneNumber });
   if (!response) {
-    throw new Error("PhoneNumber does not exist");
+    throw new Error(
+      "Số điện thoại chưa được đăng kí, vui lòng đăng kí tài khoản mới"
+    );
   }
+};
+
+export const getUserInfoService = async ({ token }) => {
+  const userInfo = await findByConditions("UserInfo", { token });
+  if (!userInfo) {
+    throw new Error("Invalid token");
+  }
+  const user = await findByConditions("User", { id: userInfo.userId });
+  const expirationTime = userInfo.expirationTime;
+  const currentTime = new Date();
+  if (currentTime > expirationTime) {
+    throw new Error("Token has expired");
+  }
+  return { userName: user.userName, phoneNumber: user.phoneNumber };
 };

@@ -6,10 +6,12 @@ import {
   forgotPasswordService,
   confirmNewPasswordService,
   verifyPhoneNymber,
+  getUserInfoService,
 } from "../services/auth";
 import {
   BadRequestException,
   InteralServerErrorException,
+  UnauthorizedException,
 } from "../middlewares/handle-errors";
 import ErrorCode from "../common/util/errorCode";
 import { phoneNumberRegex } from "../common/util/regex";
@@ -19,7 +21,7 @@ export const register = async (req, res, next) => {
     const { phoneNumber } = req.body;
     if (!phoneNumberRegex.test(phoneNumber)) {
       return BadRequestException(
-        "Invalid phoneNumber",
+        "Số điện thoại không hợp lệ",
         ErrorCode.INVALID_PARAM,
         res
       );
@@ -30,9 +32,13 @@ export const register = async (req, res, next) => {
     return res.status(200).json(response);
   } catch (error) {
     console.log(error, 99999);
-    if (error instanceof Error && error.message === "phoneNumber is exist") {
+    if (
+      error instanceof Error &&
+      error.message ===
+        "Số điện thoại đã được đăng kí. Vui lòng đăng kí với số điện thoại khác"
+    ) {
       return BadRequestException(
-        "phoneNumber is exist",
+        "Số điện thoại đã được đăng kí. Vui lòng đăng kí với số điện thoại khác",
         ErrorCode.DUPLICATE_VALUE,
         res
       );
@@ -67,10 +73,10 @@ export const vetifyCode = async (req, res, next) => {
   } catch (error) {
     if (
       error instanceof Error &&
-      error.message === "Invalid phoneNumber or code"
+      error.message === "code không hợp lệ hoặc đã hết hạn"
     ) {
       return BadRequestException(
-        "Invalid phoneNumber or code",
+        "code không hợp lệ hoặc đã hết hạn",
         ErrorCode.INVALID_PARAM,
         res
       );
@@ -120,17 +126,21 @@ export const signUp = async (req, res, next) => {
   } catch (error) {
     if (
       error instanceof Error &&
-      error.message === "PhoneNumber is not register"
+      error.message === "not implement register phoneNumber"
     ) {
       return BadRequestException(
-        "PhoneNumber is not register",
+        "not implement register phoneNumber",
         ErrorCode.NEED_REGISTER_PHONENUMBER,
         res
       );
     }
-    if (error instanceof Error && error.message === "phoneNumber is exist") {
+    if (
+      error instanceof Error &&
+      error.message ===
+        "Số điện thoại đã được đăng kí. Vui lòng đăng kí với số điện thoại khác"
+    ) {
       return BadRequestException(
-        "phoneNumber is exist",
+        "Số điện thoại đã được đăng kí. Vui lòng đăng kí với số điện thoại khác",
         ErrorCode.DUPLICATE_VALUE,
         res
       );
@@ -149,7 +159,7 @@ export const verifyPhoneNumber = async (req, res, next) => {
     const { phoneNumber } = req.body;
     if (!phoneNumberRegex.test(phoneNumber)) {
       return BadRequestException(
-        "Invalid phoneNumber",
+        "Số điện thoại không hợp lệ",
         ErrorCode.INVALID_PARAM,
         res
       );
@@ -167,10 +177,11 @@ export const verifyPhoneNumber = async (req, res, next) => {
   } catch (error) {
     if (
       error instanceof Error &&
-      error.message === "PhoneNumber does not exist"
+      error.message ===
+        "Số điện thoại chưa được đăng kí, vui lòng đăng kí tài khoản mới"
     ) {
       return BadRequestException(
-        "PhoneNumber does not exist",
+        "Số điện thoại chưa được đăng kí, vui lòng đăng kí tài khoản mới",
         ErrorCode.NOT_FOUND,
         res
       );
@@ -241,7 +252,7 @@ export const forgotPassword = async (req, res, next) => {
     const { phoneNumber } = req.body;
     if (!phoneNumberRegex.test(phoneNumber)) {
       return BadRequestException(
-        "Invalid phoneNumber",
+        "Số điện thoại không hợp lệ",
         ErrorCode.INVALID_PARAM,
         res
       );
@@ -256,12 +267,13 @@ export const forgotPassword = async (req, res, next) => {
     const response = await forgotPasswordService(req.body);
     return res.status(200).json(response);
   } catch (error) {
+    const { phoneNumber } = req.body;
     if (
       error instanceof Error &&
-      error.message === "PhoneNumber does not exist"
+      error.message === `Không tồn tại số điện thoại ${phoneNumber}`
     ) {
       return BadRequestException(
-        "PhoneNumber does not exist",
+        `Không tồn tại số điện thoại ${phoneNumber}`,
         ErrorCode.NOT_FOUND,
         res
       );
@@ -302,6 +314,34 @@ export const confirmNewPassword = async (req, res, next) => {
       return BadRequestException("User not found", ErrorCode.NOT_FOUND, res);
     }
 
+    return InteralServerErrorException(
+      "Internal error server",
+      ErrorCode.UNEXPECTED,
+      res
+    );
+  }
+};
+
+export const getUserInfo = async (req, res, next) => {
+  try {
+    const response = await getUserInfoService(req.body);
+    return res.status(200).json(response);
+  } catch (error) {
+    if (error instanceof Error && error.message === "Invalid token") {
+      return UnauthorizedException(
+        "Invalid token",
+        ErrorCode.UNAUTHORIZED,
+        res
+      );
+    }
+
+    if (error instanceof Error && error.message === "Token has expired") {
+      return UnauthorizedException(
+        "Token has expired",
+        ErrorCode.UNAUTHORIZED,
+        res
+      );
+    }
     return InteralServerErrorException(
       "Internal error server",
       ErrorCode.UNEXPECTED,

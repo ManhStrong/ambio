@@ -9,8 +9,10 @@ import forgotPassword from "./forgotPassword";
 import confirmNewPassword from "./confirmNewPassword";
 import historyLogin from "./historyLogin";
 import logout from "./logout";
+import getUserInfo from "./getUserInfo";
 const initRoutes = (app) => {
   app.use("/api/v1/users", register);
+  app.use("/api/v1/users", getUserInfo);
   app.use("/api/v1/users", vetifyCode);
   app.use("/api/v1/users", signUp);
   app.use("/api/v1/users", verifyPhoneNumber);
