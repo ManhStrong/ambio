@@ -84,10 +84,10 @@ export const vetifyCode = async (req, res, next) => {
 
     if (
       error instanceof Error &&
-      error.message === "PhoneNumber is not register"
+      error.message === "token không hợp lệ hoặc đã hết hạn"
     ) {
       return BadRequestException(
-        "PhoneNumber is not register",
+        "token không hợp lệ hoặc đã hết hạn",
         ErrorCode.NEED_REGISTER_PHONENUMBER,
         res
       );
@@ -324,7 +324,6 @@ export const confirmNewPassword = async (req, res, next) => {
 
 export const getUserInfo = async (req, res, next) => {
   try {
-    console.log(req.body, 6464664);
     const response = await getUserInfoService(req.body);
 
     return res.status(200).json(response);

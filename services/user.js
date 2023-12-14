@@ -1,11 +1,7 @@
 import db from "../models";
 import moment from "moment";
 import { Op } from "sequelize";
-import {
-  updateRecord,
-  findAll,
-  findByConditions,
-} from "../lib/mysql/baseModel";
+import userInfoModel from "../lib/mysql/userInfo";
 
 export const getHistoryLoginService = async (userInfo) => {
   try {
@@ -19,8 +15,7 @@ export const getHistoryLoginService = async (userInfo) => {
       const newExpirationTime = moment(expirationTime).add(7, "days");
 
       // Cập nhật expirationTime trong cơ sở dữ liệu
-      await updateRecord(
-        "UserInfo",
+      await userInfoModel.updateRecord(
         { expirationTime: newExpirationTime },
         {
           userId: userInfo.userId,
@@ -29,14 +24,10 @@ export const getHistoryLoginService = async (userInfo) => {
       );
     }
 
-    const listDevices = await findAll("UserInfo", { userId: userInfo.userId }, [
-      "id",
-      "updatedAt",
-      "clientID",
-      "deviceName",
-      "operatingSystem",
-      "token",
-    ]);
+    const listDevices = await userInfoModel.findAll(
+      { userId: userInfo.userId },
+      ["id", "updatedAt", "clientID", "deviceName", "operatingSystem", "token"]
+    );
 
     const currentTime = new Date();
 

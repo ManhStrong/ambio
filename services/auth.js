@@ -4,19 +4,14 @@ import generateRandomString from "../common/util/randomString";
 import bcrypt from "bcryptjs";
 import moment from "moment";
 import { getRedis, setRedis } from "../lib/redis/redisService";
-import {
-  findByConditions,
-  findOrCreate,
-  createRecord,
-  updateRecord,
-  destroyRecord,
-} from "../lib/mysql/baseModel";
 import sendSMS from "../lib/sms/senVerifyCode";
 import formatPhoneNumber from "../common/util/formatPhoneNumber";
+import userModel from "../lib/mysql/userModel";
+import userInfoModel from "../lib/mysql/userInfo";
 
 export const registerService = async ({ phoneNumber }) => {
   try {
-    const response = await findByConditions("User", { phoneNumber });
+    const response = await userModel.findByConditions({ phoneNumber });
     if (response) {
       throw new Error(
         "Số điện thoại đã được đăng kí. Vui lòng đăng kí với số điện thoại khác"
@@ -41,11 +36,11 @@ export const vetifyCodeService = async ({ phoneNumber, code, token }) => {
   try {
     const storeRandomNumber = await getRedis(phoneNumber);
     const tokenStoreRedis = await getRedis(`${phoneNumber}_token`);
-    if (tokenStoreRedis !== token) {
-      throw new Error("PhoneNumber is not register");
-    }
     if (code !== Number(storeRandomNumber)) {
       throw new Error("code không hợp lệ hoặc đã hết hạn");
+    }
+    if (tokenStoreRedis !== token) {
+      throw new Error("token không hợp lệ hoặc đã hết hạn");
     }
   } catch (error) {
     throw error;
@@ -80,23 +75,15 @@ export const signUpService = async ({
       throw new Error("not implement register phoneNumber");
     }
 
-    const { result: user, created } = await findOrCreate(
-      "User",
-      {
-        phoneNumber,
-      },
-      {
-        phoneNumber,
-        deviceTokenCFM,
-        passWord: hashPassword(passWord),
-      }
+    const { result: user, created } = await userModel.findOrCreate(
+      { phoneNumber },
+      { phoneNumber, deviceTokenCFM, passWord: hashPassword(passWord) }
     );
     if (created) {
       const userId = user.dataValues.id;
       const randomString = generateRandomString(20);
       const token = randomString.concat(userId);
-
-      await createRecord("UserInfo", {
+      await userInfoModel.createRecord({
         userId,
         token,
         clientID,
@@ -125,7 +112,7 @@ export const loginService = async ({
   operatingSystem,
 }) => {
   try {
-    const user = await findByConditions("User", { phoneNumber });
+    const user = await userModel.findByConditions({ phoneNumber });
     if (!user) {
       throw new Error("phoneNumber does not exist");
     }
@@ -134,14 +121,13 @@ export const loginService = async ({
       throw new Error("invalid phoneNumber or password");
     }
     const userId = user.id;
-    const userInfo = await findByConditions("UserInfo", { userId, clientID });
+    const userInfo = await userInfoModel.findByConditions({ userId, clientID });
 
     const randomString = generateRandomString(20);
     const token = randomString.concat(user.id);
 
     if (userInfo) {
-      await updateRecord(
-        "UserInfo",
+      await userInfoModel.updateRecord(
         {
           expirationTime: moment().add(7, "days"),
         },
@@ -154,7 +140,7 @@ export const loginService = async ({
         accessToken: userInfo.token,
       };
     } else {
-      await createRecord("UserInfo", {
+      await userInfoModel.createRecord({
         userId,
         token,
         clientID,
@@ -203,7 +189,7 @@ export const loginService = async ({
 
 export const forgotPasswordService = async ({ phoneNumber }) => {
   try {
-    const response = await findByConditions("User", { phoneNumber });
+    const response = await userModel.findByConditions({ phoneNumber });
     if (!response) {
       throw new Error(`Không tồn tại số điện thoại ${phoneNumber}`);
     }
@@ -219,7 +205,6 @@ export const forgotPasswordService = async ({ phoneNumber }) => {
     );
     return { phoneNumber, code, token };
   } catch (error) {
-    console.log(error, 89898);
     throw error;
   }
 };
@@ -238,8 +223,7 @@ export const confirmNewPasswordService = async ({
       throw new Error("PhoneNumber is not verify");
     }
     const result = await db.sequelize.transaction(async (transaction) => {
-      const user = await findByConditions(
-        "User",
+      const user = await userModel.findByConditions(
         {
           phoneNumber,
         },
@@ -257,8 +241,7 @@ export const confirmNewPasswordService = async ({
       const randomString = generateRandomString(20);
       const token = randomString.concat(user.id);
 
-      await updateRecord(
-        "User",
+      await userModel.updateRecord(
         {
           passWord: hashPassword(newPassWord),
         },
@@ -267,16 +250,14 @@ export const confirmNewPasswordService = async ({
         },
         { transaction }
       );
-      await destroyRecord(
-        "UserInfo",
+      await userInfoModel.destroyRecord(
         {
           userId: user.id,
         },
         { transaction }
       );
 
-      await createRecord(
-        "UserInfo",
+      await userInfoModel.createRecord(
         {
           userId,
           token,
@@ -300,7 +281,7 @@ export const confirmNewPasswordService = async ({
 };
 
 export const verifyPhoneNymber = async ({ phoneNumber }) => {
-  const response = await findByConditions("User", { phoneNumber });
+  const response = await userModel.findByConditions({ phoneNumber });
   if (!response) {
     throw new Error(
       "Số điện thoại chưa được đăng kí, vui lòng đăng kí tài khoản mới"
@@ -310,13 +291,11 @@ export const verifyPhoneNymber = async ({ phoneNumber }) => {
 
 export const getUserInfoService = async ({ token }) => {
   try {
-    const userInfo = await findByConditions("UserInfo", { token });
-    console.log(token, 898989);
-    console.log(userInfo, 72727);
+    const userInfo = await userInfoModel.findByConditions({ token });
     if (!userInfo) {
       throw new Error("Invalid token");
     }
-    const user = await findByConditions("User", { id: userInfo.userId });
+    const user = await userModel.findByConditions({ id: userInfo.userId });
     const expirationTime = userInfo.expirationTime;
     const currentTime = new Date();
     if (currentTime > expirationTime) {
@@ -324,7 +303,6 @@ export const getUserInfoService = async ({ token }) => {
     }
     return { userName: user.userName, phoneNumber: user.phoneNumber };
   } catch (error) {
-    console.log(error, 646464);
     throw error;
   }
 };
